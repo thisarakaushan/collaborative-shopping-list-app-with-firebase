@@ -15,6 +15,9 @@ class AuthController extends GetxController {
   final AuthRepository _authRepository = AuthRepository();
   final AuthService _authService = AuthService.to;
 
+  // Expose AuthService publicly for VerifyEmailPage
+  AuthService get authService => _authService;
+
   // Form keys
   final GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
@@ -37,22 +40,47 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _authService.authStateChanges.listen((user) {
+    // Listen to auth state changes and update currentUser
+    _authService.authStateChanges.listen((user) async {
       if (user != null) {
-        _loadUserData(user.uid);
+        final isVerified = await _authService.isEmailVerified();
+        if (isVerified) {
+          await loadUserData(user.uid);
+        } else {
+          currentUser.value = null;
+        }
       } else {
         currentUser.value = null;
       }
     });
   }
 
-  Future<void> _loadUserData(String uid) async {
+  Future<void> loadUserData(String uid) async {
     try {
       final userData = await _authRepository.getUserData(uid);
       currentUser.value = userData;
     } catch (e) {
+      // Only show snackbar on dashboard or login page
+      if (Get.currentRoute == '/dashboard' || Get.currentRoute == '/login') {
+        Get.snackbar(
+          'Error',
+          'Failed to load user data: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
       print('Error loading user data: $e');
     }
+  }
+
+  void clearControllers() {
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    displayNameController.clear();
+    forgotEmailController.clear();
   }
 
   void togglePasswordVisibility() {
@@ -115,15 +143,30 @@ class AuthController extends GetxController {
       );
 
       if (user != null) {
-        currentUser.value = user;
-        Get.offAllNamed('/dashboard');
-        Get.snackbar(
-          'Success',
-          'Welcome back, ${user.displayName}!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        if (await _authService.isEmailVerified()) {
+          currentUser.value = user;
+          clearControllers();
+          Get.offAllNamed('/dashboard');
+          Get.snackbar(
+            'Success',
+            'Welcome back, ${user.displayName}!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        } else {
+          clearControllers();
+          Get.offAllNamed('/verify-email');
+          Get.snackbar(
+            'Info',
+            'Please verify your email before logging in.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.blue,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 3),
+          );
+        }
       }
     } catch (e) {
       Get.snackbar(
@@ -132,6 +175,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     } finally {
       isLoading.value = false;
@@ -150,15 +194,19 @@ class AuthController extends GetxController {
         displayName: displayNameController.text.trim(),
       );
 
-      currentUser.value = user;
-      Get.offAllNamed('/dashboard');
-      Get.snackbar(
-        'Success',
-        'Account created successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      // ignore: unnecessary_null_comparison
+      if (user != null) {
+        clearControllers();
+        Get.offAllNamed('/verify-email');
+        Get.snackbar(
+          'Success',
+          'Account created successfully! Please verify your email.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+      }
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -166,6 +214,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     } finally {
       isLoading.value = false;
@@ -182,6 +231,7 @@ class AuthController extends GetxController {
         forgotEmailController.text.trim(),
       );
 
+      clearControllers();
       Get.back();
       Get.snackbar(
         'Success',
@@ -189,6 +239,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     } catch (e) {
       Get.snackbar(
@@ -197,6 +248,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     } finally {
       isLoading.value = false;
@@ -207,6 +259,7 @@ class AuthController extends GetxController {
     try {
       await _authService.signOut();
       currentUser.value = null;
+      clearControllers();
       Get.offAllNamed('/login');
       Get.snackbar(
         'Success',
@@ -214,6 +267,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     } catch (e) {
       Get.snackbar(
@@ -222,6 +276,7 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        duration: const Duration(seconds: 3),
       );
     }
   }

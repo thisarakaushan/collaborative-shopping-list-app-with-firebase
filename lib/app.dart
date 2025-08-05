@@ -5,8 +5,9 @@ import 'package:get/get.dart';
 // Bindings
 import '../bindings/initial_binding.dart';
 
-// Pages
-import '../../presentation/pages/auth/login_page.dart';
+// Routes
+import '../../routes/app_pages.dart';
+import '../../routes/app_routes.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -17,12 +18,13 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Shopping List',
+      initialRoute: AppRoutes.SPLASH,
+      getPages: AppPages.routes,
       initialBinding: InitialBinding(),
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const LoginPage(),
     );
   }
 }

@@ -11,12 +11,17 @@ import '../../presentation/controllers/auth_controller.dart';
 class InitialBinding extends Bindings {
   @override
   Future<void> dependencies() async {
-    await Get.putAsync(() => FirebaseService().init());
+    // Initialize FirebaseService and await its completion
+    await Get.putAsync(() => FirebaseService().init(), permanent: true);
 
+    /**
+     * Using permanent: true ensures AuthController won’t be disposed when navigating away from pages.
+     * 
+     */
     // First register AuthService before AuthController
-    Get.put(AuthService());
+    Get.put(AuthService(), permanent: true);
 
     // Register AuthController
-    Get.put(AuthController());
+    Get.put(AuthController(), permanent: true);
   }
 }

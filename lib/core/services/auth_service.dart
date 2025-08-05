@@ -10,7 +10,7 @@ class AuthService extends GetxService {
   User? get currentUser => _auth.currentUser;
   bool get isLoggedIn => currentUser != null;
 
-  //  Check the state changes from firebase - sign in/out
+  // Check the state changes from firebase - sign in/out
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   // Sign in with email and password
@@ -43,9 +43,27 @@ class AuthService extends GetxService {
       // Update display name
       await credential.user?.updateDisplayName(displayName);
 
+      // Send email verification
+      if (credential.user != null && !credential.user!.emailVerified) {
+        await credential.user!.sendEmailVerification();
+      }
+
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
+    }
+  }
+
+  // Check email verification status
+  Future<bool> isEmailVerified() async {
+    await currentUser?.reload();
+    return currentUser?.emailVerified ?? false;
+  }
+
+  // Resend verification email
+  Future<void> resendVerificationEmail() async {
+    if (currentUser != null && !currentUser!.emailVerified) {
+      await currentUser!.sendEmailVerification();
     }
   }
 
@@ -75,6 +93,10 @@ class AuthService extends GetxService {
         return 'The password provided is too weak.';
       case 'invalid-email':
         return 'The email address is not valid.';
+      case 'configuration-not-found':
+        return 'Firebase config is missing or not initialized properly.';
+      case 'email-not-verified':
+        return 'Please verify your email before logging in.';
       default:
         return e.message ?? 'An unknown error occurred.';
     }
