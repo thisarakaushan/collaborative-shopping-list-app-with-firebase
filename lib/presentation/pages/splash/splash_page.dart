@@ -1,6 +1,15 @@
+// Packages
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+// Services
+import '../../../core/services/firebase_service.dart';
+
+// Controllers
 import '../../controllers/auth_controller.dart';
+
+// Routes
+import '../../../routes/app_routes.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -29,19 +38,20 @@ class _SplashPageState extends State<SplashPage> {
   Future<void> _initializeApp() async {
     try {
       print('[SplashPage] Initializing...');
-      final authController = Get.find<AuthController>();
       await Future.delayed(const Duration(seconds: 2)); // Let animation finish
+      await Get.find<FirebaseService>().init();
+      final authController = Get.find<AuthController>();
       final user = authController.authService.currentUser;
       if (user != null) {
         final isVerified = await authController.authService.isEmailVerified();
         if (isVerified) {
           await authController.loadUserData(user.uid);
-          Get.offAllNamed('/dashboard');
+          Get.offAllNamed(AppRoutes.DASHBOARD);
         } else {
-          Get.offAllNamed('/verify-email');
+          Get.offAllNamed(AppRoutes.VERIFY_EMAIL);
         }
       } else {
-        Get.offAllNamed('/login');
+        Get.offAllNamed(AppRoutes.LOGIN);
       }
     } catch (e) {
       print('[SplashPage] Initialization error: $e');
@@ -53,7 +63,7 @@ class _SplashPageState extends State<SplashPage> {
         colorText: Colors.white,
         duration: const Duration(seconds: 3),
       );
-      Get.offAllNamed('/login');
+      Get.offAllNamed(AppRoutes.LOGIN);
     }
   }
 

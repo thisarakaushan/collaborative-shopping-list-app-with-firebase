@@ -42,6 +42,7 @@ class AuthService extends GetxService {
 
       // Update display name
       await credential.user?.updateDisplayName(displayName);
+      print("✅ Signed in successfully. UID: ${_auth.currentUser?.uid}");
 
       // Send email verification
       if (credential.user != null && !credential.user!.emailVerified) {

@@ -7,7 +7,7 @@ abstract class AppRoutes {
   static const FORGOT_PASSWORD = '/forgot-password';
   static const VERIFY_EMAIL = '/verify-email';
   static const DASHBOARD = '/dashboard';
-  // static const CREATE_LIST = '/create-list';
-  // static const JOIN_LIST = '/join-list';
-  // static const LIST_DETAIL = '/list-detail';
+  static const CREATE_LIST = '/create-list';
+  static const JOIN_LIST = '/join-list';
+  static const LIST_DETAIL = '/list-detail';
 }

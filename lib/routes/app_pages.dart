@@ -8,15 +8,15 @@ import '../../presentation/pages/auth/register_page.dart';
 import '../../presentation/pages/auth/forgot_password_page.dart';
 import '../../presentation/pages/auth/verify_email_page.dart';
 import '../../presentation/pages/dashboard/dashboard_page.dart';
-// import '../../presentation/pages/shopping_list/create_list_page.dart';
-// import '../../presentation/pages/shopping_list/join_list_page.dart';
-// import '../../presentation/pages/shopping_list/list_detail_page.dart';
-
-// import '../../presentation/controllers/dashboard_controller.dart';
-// import '../../presentation/controllers/shopping_list_controller.dart';
+import '../../presentation/pages/shopping_list/create_list_page.dart';
+import '../../presentation/pages/shopping_list/join_list_page.dart';
+import '../../presentation/pages/shopping_list/list_detail_page.dart';
 
 // Controllers
 import '../../presentation/controllers/auth_controller.dart';
+import '../../presentation/controllers/dashboard_controller.dart';
+import '../../presentation/controllers/shopping_list_controller.dart';
+import '../../presentation/controllers/list_item_controller.dart';
 
 // Routes
 import 'app_routes.dart';
@@ -55,30 +55,31 @@ class AppPages {
     GetPage(
       name: AppRoutes.DASHBOARD,
       page: () => const DashboardPage(),
-      // binding: BindingsBuilder(() {
-      //   Get.lazyPut(() => DashboardController());
-      // }),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => DashboardController());
+      }),
     ),
-    // GetPage(
-    //   name: AppRoutes.CREATE_LIST,
-    //   page: () => const CreateListPage(),
-    //   binding: BindingsBuilder(() {
-    //     Get.lazyPut(() => ShoppingListController());
-    //   }),
-    // ),
-    // GetPage(
-    //   name: AppRoutes.JOIN_LIST,
-    //   page: () => const JoinListPage(),
-    //   binding: BindingsBuilder(() {
-    //     Get.lazyPut(() => ShoppingListController());
-    //   }),
-    // ),
-    // GetPage(
-    //   name: AppRoutes.LIST_DETAIL,
-    //   page: () => const ListDetailPage(),
-    //   binding: BindingsBuilder(() {
-    //     Get.lazyPut(() => ShoppingListController());
-    //   }),
-    // ),
+    GetPage(
+      name: AppRoutes.CREATE_LIST,
+      page: () => const CreateListPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ShoppingListController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.JOIN_LIST,
+      page: () => const JoinListPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ShoppingListController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.LIST_DETAIL,
+      page: () => const ListDetailPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ShoppingListController());
+        Get.lazyPut(() => ListItemController());
+      }),
+    ),
   ];
 }
