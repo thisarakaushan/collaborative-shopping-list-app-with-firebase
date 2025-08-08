@@ -96,7 +96,7 @@ plugins {
 }
 ```
 
-```android/app/build.gradle.kts``:
+```android/app/build.gradle.kts```:
 Add at the bottom of the file:
 ```
 plugins {
@@ -205,6 +205,7 @@ lib/
 ### 🔐 Firestore Security Rules
 To enable collaborative shopping list features with proper access control, add the following Firestore rules in your Firebase Console:
 <details> <summary>📄 Click to view full rules</summary>
+
 ```
 rules_version = '2';
 service cloud.firestore {
