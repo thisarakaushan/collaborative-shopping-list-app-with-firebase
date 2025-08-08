@@ -19,7 +19,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  Alignment _alignment = Alignment.centerLeft;
+  // Alignment _alignment = Alignment.centerLeft;
+  bool _visible = false;
 
   @override
   void initState() {
@@ -27,7 +28,7 @@ class _SplashPageState extends State<SplashPage> {
     // Start animation
     Future.delayed(const Duration(milliseconds: 200), () {
       setState(() {
-        _alignment = Alignment.centerRight;
+        _visible = true;
       });
     });
 
@@ -75,14 +76,18 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedAlign(
-              duration: const Duration(seconds: 2),
-              curve: Curves.easeInOut,
-              alignment: _alignment,
-              child: Image.asset(
-                'assets/images/app_icon.png',
-                width: 100,
-                height: 100,
+            AnimatedOpacity(
+              opacity: _visible ? 1.0 : 0.0,
+              duration: const Duration(seconds: 1),
+              child: AnimatedScale(
+                scale: _visible ? 1.1 : 0.9,
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeInOut,
+                child: Image.asset(
+                  'assets/images/app_icon.png',
+                  width: 100,
+                  height: 100,
+                ),
               ),
             ),
             const SizedBox(height: 24),

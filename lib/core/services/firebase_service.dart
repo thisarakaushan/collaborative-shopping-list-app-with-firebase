@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 // Firbase options
 // import './firebase_options.dart';
@@ -17,9 +17,14 @@ class FirebaseService extends GetxService {
     try {
       // await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
       await Firebase.initializeApp();
-      // await FirebaseAppCheck.instance.activate(
-      //   androidProvider: AndroidProvider.debug,
-      // );
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: AndroidProvider.debug,
+      );
+      // Enable Firestore offline persistence
+      FirebaseFirestore.instance.settings = const Settings(
+        persistenceEnabled: true,
+      );
+      print('Firebase initialized successfully with App Check');
       return this;
     } catch (e) {
       print('Firebase initialization error: $e');

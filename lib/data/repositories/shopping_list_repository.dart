@@ -43,40 +43,38 @@ class ShoppingListRepository {
     return shoppingList;
   }
 
-  Future<ShoppingListModel?> joinShoppingList(String inviteCode) async {
+  Future<ShoppingListModel?> joinShoppingListByInviteCode(
+    String inviteCode,
+  ) async {
     final currentUser = _authService.currentUser!;
 
+    // Search for list with matching inviteCode
     final querySnapshot = await _firestore
         .collection('shopping_lists')
         .where('inviteCode', isEqualTo: inviteCode)
         .limit(1)
         .get();
 
-    if (querySnapshot.docs.isEmpty) {
-      throw Exception('Invalid invite code');
-    }
+    if (querySnapshot.docs.isEmpty) throw Exception('Invalid invite code');
 
     final doc = querySnapshot.docs.first;
-    final shoppingList = ShoppingListModel.fromMap(doc.data());
+    final sl = ShoppingListModel.fromMap(doc.data());
 
-    if (shoppingList.memberIds.contains(currentUser.uid)) {
-      return shoppingList;
-    }
+    if (sl.memberIds.contains(currentUser.uid)) return sl;
 
-    final updatedMemberIds = [...shoppingList.memberIds, currentUser.uid];
+    final updatedMemberIds = [...sl.memberIds, currentUser.uid];
     final updatedMemberNames = [
-      ...shoppingList.memberNames,
+      ...sl.memberNames,
       currentUser.displayName ?? 'Unknown',
     ];
 
-    await _firestore.collection('shopping_lists').doc(shoppingList.id).update({
+    await doc.reference.update({
       'memberIds': updatedMemberIds,
       'memberNames': updatedMemberNames,
       'updatedAt': DateTime.now().millisecondsSinceEpoch,
     });
 
-    print('Joined list with memberIds: $updatedMemberIds');
-    return shoppingList.copyWith(
+    return sl.copyWith(
       memberIds: updatedMemberIds,
       memberNames: updatedMemberNames,
       updatedAt: DateTime.now(),
@@ -91,6 +89,10 @@ class ShoppingListRepository {
         .where('memberIds', arrayContains: currentUser.uid)
         .orderBy('updatedAt', descending: true)
         .snapshots()
+        .handleError((e) {
+          print('Firestore query error: $e');
+          throw e;
+        })
         .map((snapshot) {
           final lists = snapshot.docs
               .map((doc) => ShoppingListModel.fromMap(doc.data()))

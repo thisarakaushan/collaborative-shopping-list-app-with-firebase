@@ -62,9 +62,13 @@ class ShoppingListController extends GetxController {
 
     try {
       isLoading.value = true;
-      final shoppingList = await _repository.joinShoppingList(
-        inviteCodeController.text.trim(),
+
+      final inviteCode = inviteCodeController.text
+          .trim(); // Now acting as List ID input
+      final shoppingList = await _repository.joinShoppingListByInviteCode(
+        inviteCode,
       );
+
       if (shoppingList != null) {
         inviteCodeController.clear();
         Get.back();

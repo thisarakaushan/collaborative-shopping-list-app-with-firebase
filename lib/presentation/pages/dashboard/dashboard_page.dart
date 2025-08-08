@@ -9,6 +9,7 @@ import '../../controllers/auth_controller.dart';
 
 // Widgets
 import '../../widgets/custom_button.dart';
+import '../../widgets/loading_widget.dart';
 
 // Models
 import '../../../data/models/shopping_list_model.dart';
@@ -29,10 +30,18 @@ class DashboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(AppStrings.dashboardTitle),
+        title: Text(
+          AppStrings.dashboardTitle,
+          style: TextStyle(
+            fontSize: AppDimensions.textSizeTitle,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
         backgroundColor: AppColors.cardBackground,
         foregroundColor: AppColors.textPrimary,
-        elevation: 1,
+        elevation: 2,
+        shadowColor: AppColors.textSecondary.withOpacity(0.2),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -44,49 +53,94 @@ class DashboardPage extends StatelessWidget {
               PopupMenuItem(
                 value: 'logout',
                 child: Row(
-                  children: const [
-                    Icon(Icons.logout, size: AppDimensions.iconSizeMedium),
-                    SizedBox(width: AppDimensions.paddingSmall),
-                    Text('Logout'),
+                  children: [
+                    Icon(
+                      Icons.logout,
+                      size: AppDimensions.iconSizeMedium,
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(width: AppDimensions.paddingSmall),
+                    Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: AppDimensions.textSizeBody,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
-            child: CircleAvatar(
-              backgroundColor: AppColors.primary,
-              child: Obx(
-                () => Text(
-                  authController.currentUser.value?.displayName
-                          .substring(0, 1)
-                          .toUpperCase() ??
-                      'U',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                right: AppDimensions.paddingMedium,
+              ),
+              child: AnimatedScale(
+                scale: 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: CircleAvatar(
+                  backgroundColor: AppColors.accent,
+                  radius: 20,
+                  child: Obx(
+                    () => Text(
+                      authController.currentUser.value?.displayName
+                              .substring(0, 1)
+                              .toUpperCase() ??
+                          'U',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: AppDimensions.textSizeSubtitle,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: AppDimensions.paddingMedium),
         ],
       ),
       body: Column(
         children: [
           Container(
             width: double.infinity,
+            margin: const EdgeInsets.all(AppDimensions.paddingMedium),
             padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-            color: AppColors.cardBackground,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.1),
+                  AppColors.accent.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(
+                AppDimensions.cardBorderRadius,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.textSecondary.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Obx(
-                  () => Text(
-                    'Welcome back, ${authController.currentUser.value?.displayName ?? 'User'}!',
-                    style: TextStyle(
-                      fontSize: AppDimensions.textSizeTitle,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Obx(
+                    () => Text(
+                      'Welcome back, ${authController.currentUser.value?.displayName ?? 'User'}!',
+                      style: TextStyle(
+                        fontSize: AppDimensions.textSizeTitle,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -96,173 +150,369 @@ class DashboardPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: AppDimensions.textSizeSubtitle,
                     color: AppColors.textSecondary,
+                    height: 1.3,
                   ),
                 ),
               ],
             ),
           ),
-          Padding(
+          Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingMedium,
+            ),
             padding: const EdgeInsets.all(AppDimensions.paddingMedium),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(
+                AppDimensions.cardBorderRadius,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.textSecondary.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Row(
               children: [
                 Expanded(
-                  child: CustomButton(
-                    text: AppStrings.createList,
-                    onPressed: controller.goToCreateList,
-                    backgroundColor: AppColors.primary,
-                    height: AppDimensions.buttonHeight,
+                  child: AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: const Duration(milliseconds: 400),
+                    child: CustomButton(
+                      text: AppStrings.createList,
+                      onPressed: controller.goToCreateList,
+                      backgroundColor: AppColors.primary,
+                      textColor: Colors.white,
+                      height: AppDimensions.buttonHeight,
+                      borderRadius: AppDimensions.cardBorderRadius,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppDimensions.paddingSmall),
                 Expanded(
-                  child: CustomButton(
-                    text: AppStrings.joinList,
-                    onPressed: controller.goToJoinList,
-                    backgroundColor: AppColors.secondary,
-                    height: AppDimensions.buttonHeight,
+                  child: AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: const Duration(milliseconds: 400),
+                    child: CustomButton(
+                      text: AppStrings.joinList,
+                      onPressed: controller.goToJoinList,
+                      backgroundColor: AppColors.secondary,
+                      textColor: Colors.white,
+                      height: AppDimensions.buttonHeight,
+                      borderRadius: AppDimensions.cardBorderRadius,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<ShoppingListModel>>(
-              stream: controller.shoppingListRepository.getUserShoppingLists(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: TextStyle(color: AppColors.error),
-                    ),
-                  );
-                }
-                final shoppingLists = snapshot.data ?? [];
-                if (shoppingLists.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.shopping_cart_outlined,
-                          size: AppDimensions.iconSizeLarge,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(height: AppDimensions.paddingMedium),
-                        Text(
-                          AppStrings.noListsMessage,
-                          style: TextStyle(
-                            fontSize: AppDimensions.textSizeTitle,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondary,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                controller.refreshLists();
+              },
+              color: AppColors.primary,
+              child: StreamBuilder<List<ShoppingListModel>>(
+                stream: controller.shoppingListRepository
+                    .getUserShoppingLists(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return LoadingWidget(
+                      message: 'Loading lists...',
+                      size: AppDimensions.iconSizeLarge,
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: AppDimensions.iconSizeLarge,
+                            color: AppColors.error,
                           ),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingSmall),
-                        Text(
-                          AppStrings.createFirstList,
-                          style: TextStyle(
-                            fontSize: AppDimensions.textSizeSubtitle,
-                            color: AppColors.textSecondary,
+                          const SizedBox(height: AppDimensions.paddingMedium),
+                          Text(
+                            'Error loading lists: ${snapshot.error}',
+                            style: TextStyle(
+                              fontSize: AppDimensions.textSizeSubtitle,
+                              color: AppColors.error,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimensions.paddingMedium,
-                  ),
-                  itemCount: shoppingLists.length,
-                  itemBuilder: (context, index) {
-                    final shoppingList = shoppingLists[index];
-                    final isOwner =
-                        shoppingList.ownerId ==
-                        authController.currentUser.value?.uid;
-                    return Card(
-                      margin: const EdgeInsets.only(
-                        bottom: AppDimensions.paddingMedium,
+                          const SizedBox(height: AppDimensions.paddingMedium),
+                          CustomButton(
+                            text: 'Retry',
+                            onPressed: () => controller.refreshLists(),
+                            backgroundColor: AppColors.primary,
+                            textColor: Colors.white,
+                            height: AppDimensions.buttonHeight,
+                            borderRadius: AppDimensions.cardBorderRadius,
+                          ),
+                        ],
                       ),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.cardBorderRadius,
-                        ),
-                      ),
-                      child: InkWell(
-                        onTap: () => controller.goToListDetail(shoppingList),
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.cardBorderRadius,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(
-                            AppDimensions.paddingMedium,
+                    );
+                  }
+                  final shoppingLists = snapshot.data ?? [];
+                  if (shoppingLists.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedScale(
+                            scale: 1.0,
+                            duration: const Duration(milliseconds: 500),
+                            child: Icon(
+                              Icons.shopping_cart_outlined,
+                              size: AppDimensions.iconSizeLarge,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                          const SizedBox(height: AppDimensions.paddingMedium),
+                          Text(
+                            AppStrings.noListsMessage,
+                            style: TextStyle(
+                              fontSize: AppDimensions.textSizeTitle,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimensions.paddingSmall),
+                          Text(
+                            AppStrings.createFirstList,
+                            style: TextStyle(
+                              fontSize: AppDimensions.textSizeSubtitle,
+                              color: AppColors.textSecondary,
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: AppDimensions.paddingMedium),
+                          CustomButton(
+                            text: 'Create a List',
+                            icon: Icons.add,
+                            onPressed: controller.goToCreateList,
+                            backgroundColor: AppColors.primary,
+                            textColor: Colors.white,
+                            height: AppDimensions.buttonHeight,
+                            borderRadius: AppDimensions.cardBorderRadius,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.paddingMedium,
+                      vertical: AppDimensions.paddingMedium,
+                    ),
+                    itemCount: shoppingLists.length,
+                    itemBuilder: (context, index) {
+                      final shoppingList = shoppingLists[index];
+                      final isOwner =
+                          shoppingList.ownerId ==
+                          authController.currentUser.value?.uid;
+                      return AnimatedOpacity(
+                        opacity: 1.0,
+                        duration: Duration(milliseconds: 300 + (index * 100)),
+                        child: Card(
+                          margin: const EdgeInsets.only(
+                            bottom: AppDimensions.paddingMedium,
+                          ),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.cardBorderRadius,
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () =>
+                                controller.goToListDetail(shoppingList),
+                            borderRadius: BorderRadius.circular(
+                              AppDimensions.cardBorderRadius,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                AppDimensions.paddingMedium,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          shoppingList.title,
-                                          style: TextStyle(
-                                            fontSize:
-                                                AppDimensions.textSizeSubtitle,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.textPrimary,
-                                          ),
-                                        ),
-                                        if (shoppingList.description.isNotEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: AppDimensions.paddingSmall,
-                                            ),
-                                            child: Text(
-                                              shoppingList.description,
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              shoppingList.title,
                                               style: TextStyle(
-                                                fontSize:
-                                                    AppDimensions.textSizeBody,
-                                                color: AppColors.textSecondary,
+                                                fontSize: AppDimensions
+                                                    .textSizeSubtitle,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
                                               ),
                                             ),
+                                            if (shoppingList
+                                                .description
+                                                .isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: AppDimensions
+                                                      .paddingSmall,
+                                                ),
+                                                child: Text(
+                                                  shoppingList.description,
+                                                  style: TextStyle(
+                                                    fontSize: AppDimensions
+                                                        .textSizeBody,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                    height: 1.3,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      PopupMenuButton<String>(
+                                        onSelected: (value) {
+                                          if (value == 'leave') {
+                                            controller.leaveList(shoppingList);
+                                          }
+                                        },
+                                        itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            value: 'leave',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  isOwner
+                                                      ? Icons.delete
+                                                      : Icons.exit_to_app,
+                                                  size: AppDimensions
+                                                      .iconSizeMedium,
+                                                  color: AppColors.error,
+                                                ),
+                                                const SizedBox(
+                                                  width: AppDimensions
+                                                      .paddingSmall,
+                                                ),
+                                                Text(
+                                                  isOwner ? 'Delete' : 'Leave',
+                                                  style: TextStyle(
+                                                    fontSize: AppDimensions
+                                                        .textSizeBody,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                      ],
-                                    ),
+                                        ],
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            AppDimensions.cardBorderRadius / 2,
+                                          ),
+                                        ),
+                                        color: AppColors.cardBackground,
+                                        elevation: 4,
+                                      ),
+                                    ],
                                   ),
-                                  PopupMenuButton<String>(
-                                    onSelected: (value) {
-                                      if (value == 'leave') {
-                                        controller.leaveList(shoppingList);
-                                      }
-                                    },
-                                    itemBuilder: (context) => [
-                                      PopupMenuItem(
-                                        value: 'leave',
+                                  const SizedBox(
+                                    height: AppDimensions.paddingMedium,
+                                  ),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal:
+                                              AppDimensions.paddingSmall,
+                                          vertical:
+                                              AppDimensions.paddingSmall / 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withOpacity(
+                                            0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            AppDimensions.cardBorderRadius / 2,
+                                          ),
+                                        ),
                                         child: Row(
                                           children: [
                                             Icon(
-                                              isOwner
-                                                  ? Icons.delete
-                                                  : Icons.exit_to_app,
+                                              Icons.people,
                                               size:
                                                   AppDimensions.iconSizeMedium,
-                                              color: AppColors.error,
+                                              color: AppColors.primary,
                                             ),
                                             const SizedBox(
-                                              width: AppDimensions.paddingSmall,
+                                              width:
+                                                  AppDimensions.paddingSmall /
+                                                  2,
                                             ),
                                             Text(
-                                              isOwner ? 'Delete' : 'Leave',
+                                              '${shoppingList.memberIds.length} members',
                                               style: TextStyle(
-                                                color: AppColors.error,
+                                                fontSize:
+                                                    AppDimensions.textSizeBody,
+                                                color: AppColors.textPrimary,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: AppDimensions.paddingMedium,
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal:
+                                              AppDimensions.paddingSmall,
+                                          vertical:
+                                              AppDimensions.paddingSmall / 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.secondary
+                                              .withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            AppDimensions.cardBorderRadius / 2,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.access_time,
+                                              size:
+                                                  AppDimensions.iconSizeMedium,
+                                              color: AppColors.secondary,
+                                            ),
+                                            const SizedBox(
+                                              width:
+                                                  AppDimensions.paddingSmall /
+                                                  2,
+                                            ),
+                                            Text(
+                                              DateFormat(
+                                                'MMM dd, yyyy',
+                                              ).format(shoppingList.updatedAt),
+                                              style: TextStyle(
+                                                fontSize:
+                                                    AppDimensions.textSizeBody,
+                                                color: AppColors.textPrimary,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ],
@@ -270,80 +520,47 @@ class DashboardPage extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                  if (isOwner)
+                                    Container(
+                                      margin: const EdgeInsets.only(
+                                        top: AppDimensions.paddingSmall,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppDimensions.paddingSmall,
+                                        vertical:
+                                            AppDimensions.paddingSmall / 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            AppColors.primary.withOpacity(0.2),
+                                            AppColors.accent.withOpacity(0.2),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          AppDimensions.cardBorderRadius / 2,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        'Owner',
+                                        style: TextStyle(
+                                          fontSize:
+                                              AppDimensions.textSizeBody - 2,
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
-                              const SizedBox(
-                                height: AppDimensions.paddingMedium,
-                              ),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.people,
-                                    size: AppDimensions.iconSizeMedium,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(
-                                    width: AppDimensions.paddingSmall,
-                                  ),
-                                  Text(
-                                    '${shoppingList.memberIds.length} members',
-                                    style: TextStyle(
-                                      fontSize: AppDimensions.textSizeBody,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: AppDimensions.paddingMedium,
-                                  ),
-                                  Icon(
-                                    Icons.access_time,
-                                    size: AppDimensions.iconSizeMedium,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  const SizedBox(
-                                    width: AppDimensions.paddingSmall,
-                                  ),
-                                  Text(
-                                    DateFormat(
-                                      'MMM dd, yyyy',
-                                    ).format(shoppingList.updatedAt),
-                                    style: TextStyle(
-                                      fontSize: AppDimensions.textSizeBody,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (isOwner)
-                                Container(
-                                  margin: const EdgeInsets.only(
-                                    top: AppDimensions.paddingSmall,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppDimensions.paddingSmall,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'Owner',
-                                    style: TextStyle(
-                                      fontSize: AppDimensions.textSizeBody - 2,
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],

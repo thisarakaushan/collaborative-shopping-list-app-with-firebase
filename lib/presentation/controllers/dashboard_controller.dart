@@ -8,6 +8,9 @@ import '../../data/models/shopping_list_model.dart';
 // Repositories
 import '../../data/repositories/shopping_list_repository.dart';
 
+// Services
+import '../../core/services/auth_service.dart';
+
 // Controllers
 import '../../presentation/controllers/auth_controller.dart';
 
@@ -18,6 +21,7 @@ class DashboardController extends GetxController {
   final ShoppingListRepository shoppingListRepository =
       ShoppingListRepository();
   final AuthController _authController = Get.find<AuthController>();
+  final AuthService _authService = AuthService.to;
   final RxBool isLoading = false.obs;
 
   void goToCreateList() {
@@ -35,8 +39,7 @@ class DashboardController extends GetxController {
   Future<void> leaveList(ShoppingListModel shoppingList) async {
     try {
       isLoading.value = true;
-      final isOwner =
-          shoppingList.ownerId == _authController.currentUser.value?.uid;
+      final isOwner = shoppingList.ownerId == _authService.currentUser?.uid;
       await Get.dialog(
         AlertDialog(
           title: Text(isOwner ? 'Delete List' : 'Leave List'),
@@ -86,5 +89,9 @@ class DashboardController extends GetxController {
 
   void logout() {
     _authController.logout();
+  }
+
+  void refreshLists() {
+    update(); // Trigger UI refresh
   }
 }
