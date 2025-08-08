@@ -201,3 +201,94 @@ lib/
 - Verify email setup
 - Forgot password setup
 - Shared list management using Firestore
+
+### 🔐 Firestore Security Rules
+To enable collaborative shopping list features with proper access control, add the following Firestore rules in your Firebase Console:
+<details> <summary>📄 Click to view full rules</summary>
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow each user to manage their own user profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Shopping List rules
+    match /shopping_lists/{listId} {
+      // Allow listing shopping lists by inviteCode
+      allow list: if request.auth != null;
+
+      // Allow reading if the user is in member list
+      allow read: if request.auth != null &&
+        request.auth.uid in resource.data.memberIds;
+
+      // Allow creating if the user is listed in memberIds at creation
+      allow create: if request.auth != null &&
+        request.auth.uid in request.resource.data.memberIds;
+
+      // Allow updating if user is in current or new member list and inviteCode is unchanged
+      allow update: if request.auth != null &&
+        (
+          request.auth.uid in resource.data.memberIds || 
+          (
+            request.auth.uid in request.resource.data.memberIds &&
+            resource.data.inviteCode == request.resource.data.inviteCode
+          )
+        );
+
+      // Allow deletion if user is in member list
+      allow delete: if request.auth != null &&
+        request.auth.uid in resource.data.memberIds;
+    }
+
+    // Shopping List Items rules
+    match /list_items/{itemId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null &&
+        exists(/databases/$(database)/documents/shopping_lists/$(request.resource.data.listId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/shopping_lists/$(request.resource.data.listId)).data.memberIds;
+
+      allow update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/shopping_lists/$(resource.data.listId)) &&
+        request.auth.uid in get(/databases/$(database)/documents/shopping_lists/$(resource.data.listId)).data.memberIds;
+    }
+  }
+}
+```
+
+### 📚 Firestore Indexes
+To support invite-based queries and efficient list filtering, make sure to create the following Firestore indexes:
+#### Invite Code Query (when joining a list)
+If your code queries shopping lists like this:
+```
+FirebaseFirestore.instance
+.collection('shopping_lists')
+.where('inviteCode', isEqualTo: code)
+```
+
+➡️ Then you need a single-field index on:
+- inviteCode field (Ascending)
+✅ Firebase usually creates this automatically, but if you see an error like FAILED_PRECONDITION: The query requires an index, click the Firebase Console link in the error or create it manually.
+
+#### 📌 Optional: Composite Index (if needed)
+If your app queries using multiple fields, such as:
+```
+.where('inviteCode', isEqualTo: code)
+.where('memberIds', arrayContains: uid)
+```
+➡️ Then you'll need to create a composite index manually in Firebase.
+
+#### 📍 How to Add Indexes
+
+1. Go to Firestore Database → Indexes in Firebase Console
+2. Click "Add Index"
+Select:
+- Collection: ```shopping_lists```
+- Fields:
+  - ```inviteCode``` — Ascending
+  - (optional) ```memberIds``` — array-contains
+  - Query scope: Collection
+
